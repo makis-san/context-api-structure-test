@@ -1,0 +1,1 @@
+export { queryPokemons } from './queryPokemons'

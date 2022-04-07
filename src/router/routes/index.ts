@@ -1,0 +1,1 @@
+export { renderHomeRoute } from './Home'
