@@ -9,7 +9,9 @@ import { ReturnOBJ } from '../../hooks/query/queryPokemons'
 
 declare interface EntitiesType {
   pokemons: ReturnOBJ
+  student: string
 }
+
 declare type EntitiesOBJType = {
   [Property in keyof EntitiesType]-?: EntitiesType[Property][]
 }
@@ -18,13 +20,17 @@ interface PageContextTypes {
   entities: EntitiesOBJType
   dispatchData: (
     entity: keyof EntitiesType,
-    data: EntitiesType[keyof EntitiesType][]
+    data: EntitiesType[keyof EntitiesType][],
+    options?: {
+      keepLast?: boolean
+    }
   ) => void
 }
 
 const PageContext = createContext({} as PageContextTypes)
 
 export const usePage = () => useContext(PageContext)
+
 export const PageContextWrapper: React.FC = ({ children }) => {
   const [entities, setEntities] = useState<EntitiesOBJType>(
     {} as EntitiesOBJType
@@ -32,11 +38,21 @@ export const PageContextWrapper: React.FC = ({ children }) => {
 
   // Set entities value
   const dispatchData = useCallback(
-    (entity: keyof EntitiesType, data: EntitiesType[keyof EntitiesType][]) => {
-      if (entities[entity] && entities[entity].length > 0) {
+    (
+      entity: keyof EntitiesType,
+      data: EntitiesType[keyof EntitiesType][],
+      options?: {
+        keepLast?: boolean
+      }
+    ) => {
+      if (
+        options?.keepLast &&
+        entities[entity] &&
+        entities[entity].length > 0
+      ) {
         return setEntities((cur) => ({
           ...cur,
-          [entity]: [...entities[entity], ...data]
+          [entity]: [...cur[entity], ...data]
         }))
       }
       return setEntities((cur) => ({
@@ -44,7 +60,7 @@ export const PageContextWrapper: React.FC = ({ children }) => {
         [entity]: data
       }))
     },
-    []
+    [entities]
   )
 
   const ctxValue = useMemo(
